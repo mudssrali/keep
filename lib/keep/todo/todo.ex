@@ -17,10 +17,17 @@ defmodule Keep.Todo do
   end
 
   @doc """
-  returns a single todo list with items
+  returns a todo list with items
   """
-  def get_list(id) do
+  def get_list!(id) do
     Repo.get!(List, id)
+  end
+
+  @doc """
+  returns an todo list item
+  """
+  def get_item!(id)do
+    Repo.get!(Item, id)
   end
 
   @doc """
@@ -43,7 +50,7 @@ defmodule Keep.Todo do
   updates a todo list
   """
   def update_list(id, attrs) do
-    list = get_list(id)
+    list = get_list!(id)
 
     if list.archived do
       {:error, "archived list cannot be updated."}
@@ -58,7 +65,7 @@ defmodule Keep.Todo do
   """
   @spec archive_list(String.t()) :: %List{}
   def archive_list(id) do
-    list = get_list(id)
+    list = get_list!(id)
     list = Ecto.Changeset.change(list, archived: true)
     Repo.update(list)
   end
@@ -67,7 +74,7 @@ defmodule Keep.Todo do
   creates a todo list item
   """
   def create_item(attrs) do
-    list = get_list(attrs.list_id)
+    list = get_list!(attrs.list_id)
 
     if list.archived do
       {:error, "item cannot be created in archived list."}
@@ -79,13 +86,28 @@ defmodule Keep.Todo do
   end
 
   @doc """
+  updates a todo list item
+  """
+  def update_item(id, attrs) do
+    item = get_item!(id)
+    list = get_list!(attrs.list_id)
+
+    if list.archived do
+      {:error, "item cannot be updated in archived list."}
+    else
+      item = Ecto.Changeset.change(item, content: attrs.content)
+      Repo.update(item)
+    end
+  end
+
+  @doc """
   marks list item as completed
   """
   @spec mark_item_completed(String.t()) :: %Item{}
   def mark_item_completed(id) do
-    item = Repo.get!(Item, id)
+    item = get_item!(id)
 
-    list = get_list(item.list_id)
+    list = get_list!(item.list_id)
 
     if list.archived do
       {:error, "item cannot be marked as completed in archived list."}

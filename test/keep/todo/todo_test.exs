@@ -72,7 +72,7 @@ defmodule Keep.TodoTest do
       items = ["Orange", "Grape Fruit", "Lemon"]
       {:ok, list} = Todo.create_list_with_items(%{title: title}, items)
       {:ok, list} = Todo.archive_list(list.id)
-      list = Todo.get_list(list.id) |> Repo.preload(:items)
+      list = Todo.get_list!(list.id) |> Repo.preload(:items)
       [head | _] = list.items
       {status, _} = Todo.mark_item_completed(head.id)
       assert status == :error
