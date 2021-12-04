@@ -18,7 +18,7 @@ defmodule Keep.Todo.List do
   @doc false
   def changeset(%List{} = list, attrs) do
     list
-    |> cast(attrs, [:title])
+    |> cast(attrs, [:title, :archived])
     |> validate_required([:title])
   end
 end
