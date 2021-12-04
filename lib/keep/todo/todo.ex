@@ -1,0 +1,124 @@
+defmodule Keep.Todo do
+  @moduledoc """
+  Provides handles to create, update, archive/unarchive and mark complete/incomplete list and list items.
+  """
+
+  alias Keep.Repo
+  alias Keep.Todo.List
+  alias Keep.Todo.Item
+
+  @doc """
+  returns all todo lists with items
+  """
+  def all do
+    Repo.all(List)
+    |> Repo.preload(:items)
+  end
+
+  @doc """
+  returns a single todo list with items
+  """
+  def get_list(id) do
+    Repo.get!(List, id)
+  end
+
+  @doc """
+  returns an empty todo list struct
+  """
+  def new_list do
+    List.changeset(%List{}, %{})
+  end
+
+  @doc """
+  creates a new todo list
+  """
+  def create_list(attrs) do
+    %List{}
+    |> List.changeset(attrs)
+    |> Repo.insert()
+  end
+
+
+  @doc """
+  updates a todo list
+  """
+  def update_list_(id, attrs) do
+    list = get_list(id)
+    
+    if list.archived do
+      {:error, "archived list cannot be updated"}
+    end
+    
+    list = Ecto.Changeset.change(list, archived: Map.get(attrs, :title))
+    Repo.update(list)
+  end
+
+  @doc """
+  archives an existing list
+  """
+  @spec archive_list(String.t()) :: %List{}
+  def archive_list(id) do
+    list = get_list(id)
+    list = Ecto.Changeset.change(list, archived: true)
+    Repo.update(list)
+  end
+
+  @doc """
+  creates a todo list item
+  """
+  def create_item(attrs) do
+    %Item{}
+    |> Item.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  marks list item as completed
+  """
+  @spec mark_item_completed(String.t()) :: %Item{}
+  def mark_item_completed(id) do
+    item = Repo.get!(Item, id)
+
+    list = Repo.get!(List, item.list_id)
+
+    if list.archived do
+      {:error, "archived list cannot be updated"}
+    else
+      item = Ecto.Changeset.change(item, completed: true)
+      Repo.update(item)
+    end
+  end
+
+  @doc """
+  creates a todo list with items
+  """
+  @spec create_list_with_items(%{}, [String.t()]) :: %List{}
+  def create_list_with_items(list_attrs, items) do
+    Repo.transaction(fn ->
+      with {:ok, list} <- create_list(list_attrs),
+           {:ok, _} <- create_items(items, list) do
+        list |> Repo.preload(:items)
+      else
+        _ -> Repo.rollback("Failed to create list")
+      end
+    end)
+  end
+
+  @doc """
+  creates items for a todo list
+  """
+  @spec create_items([String.t()], %List{}) :: {}
+  def create_items(items, list) do
+    results =
+      items
+      |> Enum.map(fn content ->
+        create_item(%{content: content, list_id: list.id})
+      end)
+
+    if Enum.any?(results, fn {status, _} -> status == :error end) do
+      {:error, "Failed to create an item"}
+    else
+      {:ok, results}
+    end
+  end
+end
