@@ -42,11 +42,11 @@ defmodule Keep.Todo do
   @doc """
   updates a todo list
   """
-  def update_list_(id, attrs) do
+  def update_list(id, attrs) do
     list = get_list(id)
 
     if list.archived do
-      {:error, "archived list cannot be updated"}
+      {:error, "archived list cannot be updated."}
     end
 
     list = Ecto.Changeset.change(list, archived: Map.get(attrs, :title))
@@ -67,9 +67,15 @@ defmodule Keep.Todo do
   creates a todo list item
   """
   def create_item(attrs) do
-    %Item{}
-    |> Item.changeset(attrs)
-    |> Repo.insert()
+    list = get_list(attrs.list_id)
+
+    if list.archived do
+      {:error, "item cannot be created in archived list."}
+    else
+      %Item{}
+      |> Item.changeset(attrs)
+      |> Repo.insert()
+    end
   end
 
   @doc """
@@ -79,10 +85,10 @@ defmodule Keep.Todo do
   def mark_item_completed(id) do
     item = Repo.get!(Item, id)
 
-    list = Repo.get!(List, item.list_id)
+    list = get_list(item.list_id)
 
     if list.archived do
-      {:error, "archived list cannot be updated"}
+      {:error, "item cannot be marked as completed in archived list."}
     else
       item = Ecto.Changeset.change(item, completed: true)
       Repo.update(item)
