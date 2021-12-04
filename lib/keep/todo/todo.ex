@@ -21,6 +21,7 @@ defmodule Keep.Todo do
   """
   def get_list!(id) do
     Repo.get!(List, id)
+    |> Repo.preload(:items)
   end
 
   @doc """
@@ -90,7 +91,7 @@ defmodule Keep.Todo do
   """
   def update_item(id, attrs) do
     item = get_item!(id)
-    list = get_list!(attrs.list_id)
+    list = get_list!(item.list_id)
 
     if list.archived do
       {:error, "item cannot be updated in archived list."}
@@ -106,7 +107,6 @@ defmodule Keep.Todo do
   @spec mark_item_completed(String.t()) :: %Item{}
   def mark_item_completed(id) do
     item = get_item!(id)
-
     list = get_list!(item.list_id)
 
     if list.archived do
