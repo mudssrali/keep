@@ -21,9 +21,24 @@ defmodule KeepWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", KeepWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", KeepWeb do
+    pipe_through :api
+  end
+
+
+  # Public APIs
+  scope "/api", KeepWeb.API do
+
+    post("/list/create", TodoController, :create_list)
+    post("/list/update", TodoController, :update_list)
+    post("/list/archive", TodoController, :archive_list)
+    post("/list/item/create", TodoController, :create_item)
+    post("/list/item/update", TodoController, :update_item)
+    post("/list/item/completed", TodoController, :complete_item)
+    
+    get("/lists", TodoController, :get_lists)
+    get("/list", TodoController, :get_list)
+  end
 
   # Enables LiveDashboard only for development
   #
