@@ -2,6 +2,7 @@ defmodule Keep.Todo do
   @moduledoc """
   Provides handles to create, update, archive/unarchive and mark complete/incomplete list and list items.
   """
+  import Ecto.Query
 
   alias Keep.Repo
   alias Keep.Todo.List
@@ -38,17 +39,16 @@ defmodule Keep.Todo do
     |> Repo.insert()
   end
 
-
   @doc """
   updates a todo list
   """
   def update_list_(id, attrs) do
     list = get_list(id)
-    
+
     if list.archived do
       {:error, "archived list cannot be updated"}
     end
-    
+
     list = Ecto.Changeset.change(list, archived: Map.get(attrs, :title))
     Repo.update(list)
   end
@@ -120,5 +120,19 @@ defmodule Keep.Todo do
     else
       {:ok, results}
     end
+  end
+
+  @doc """
+  archives all unarchived lists that have not been updated in last 24 hours
+  """
+  def archive_lists do
+    query =
+      from l in List,
+        where:
+          l.archived == false and
+            (l.inserted_at == l.updated_at or
+               l.updated_at < datetime_add(^NaiveDateTime.utc_now(), -1, "hour"))
+
+    Repo.update_all(query, set: [archived: true, updated_at: NaiveDateTime.utc_now()])
   end
 end
