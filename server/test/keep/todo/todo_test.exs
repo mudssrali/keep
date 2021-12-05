@@ -52,29 +52,29 @@ defmodule Keep.TodoTest do
     end
 
 
-    test "archive_list/1 archives an existing list" do
+    test "update_list_status/1 archives an existing list" do
       {:ok, list} = Todo.create_list(@valid_attrs)
-      {:ok, archived_list} = Todo.archive_list(list.id)
+      {:ok, archived_list} = Todo.update_list_status(list.id, true)
       assert archived_list.archived
     end
 
-    test "mark_item_completed/1 mark todo list item as completed" do
+    test "update_item_status/1 mark todo list item as completed" do
       title = "Citrus Fruit"
       items = ["Orange", "Grape Fruit", "Lemon"]
       {:ok, list} = Todo.create_list_with_items(%{title: title}, items)
       [head | _] = list.items
-      {:ok, item} = Todo.mark_item_completed(head.id)
+      {:ok, item} = Todo.update_item_status(head.id, true)
       assert item.completed
     end
 
-    test "mark_item_completed/1 does not mark completed when list is archived" do
+    test "update_item_status/1 does not mark completed when list is archived" do
       title = "Citrus Fruit"
       items = ["Orange", "Grape Fruit", "Lemon"]
       {:ok, list} = Todo.create_list_with_items(%{title: title}, items)
-      {:ok, list} = Todo.archive_list(list.id)
-      list = Todo.get_list!(list.id) |> Repo.preload(:items)
+      {:ok, list} = Todo.update_list_status(list.id, true)
+      list = Todo.get_list!(list.id)
       [head | _] = list.items
-      {status, _} = Todo.mark_item_completed(head.id)
+      {status, _} = Todo.update_item_status(head.id, true)
       assert status == :error
     end
 

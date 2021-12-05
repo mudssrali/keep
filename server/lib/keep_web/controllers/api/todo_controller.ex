@@ -80,13 +80,13 @@ defmodule KeepWeb.API.TodoController do
   end
 
   @doc """
-  Archive an existing todo list
+  Archive or unachive an existing todo list
   """
-  def archive_list(conn, params) do
-    list_id = Map.get(params, "list_id")
-
+  def update_list_status(conn, params) do
+    id = Map.get(params, "list_id")
+    status = Map.get(params, "archived")
     response =
-      case Todo.archive_list(list_id) do
+      case Todo.update_list_status(id, status) do
         {:ok, list} ->
           succeed(list)
 
@@ -141,13 +141,13 @@ defmodule KeepWeb.API.TodoController do
   end
 
   @doc """
-  Complete an item
+  Update item status to completed or not completed
   """
-  def complete_item(conn, params) do
-    item_id = Map.get(params, "item_id")
-
+  def update_item_status(conn, params) do
+    id = Map.get(params, "item_id")
+    status = Map.get(params, "completed")
     response =
-      case Todo.mark_item_completed(item_id) do
+      case Todo.update_item_status(id, status) do
         {:ok, item} ->
           succeed(item)
 

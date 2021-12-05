@@ -13,7 +13,7 @@ defmodule Keep.Todo do
   """
   def all do
     query = from(l in List, order_by: [desc: :inserted_at], select: l)
-    
+
     Repo.all(query)
     |> Repo.preload(:items)
   end
@@ -29,7 +29,7 @@ defmodule Keep.Todo do
   @doc """
   returns an todo list item
   """
-  def get_item!(id)do
+  def get_item!(id) do
     Repo.get!(Item, id)
   end
 
@@ -44,17 +44,18 @@ defmodule Keep.Todo do
   creates a new todo list
   """
   def create_list(attrs) do
-   list = %List{}
-    |> List.changeset(attrs)
-    |> Repo.insert()
+    list =
+      %List{}
+      |> List.changeset(attrs)
+      |> Repo.insert()
 
-  case list do
-    {:ok, list} ->
-      {:ok, Repo.preload(list, :items)}
-    {:error, error} ->
-      {:error, error}
-  end
-  
+    case list do
+      {:ok, list} ->
+        {:ok, Repo.preload(list, :items)}
+
+      {:error, error} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -67,17 +68,18 @@ defmodule Keep.Todo do
       {:error, "archived list cannot be updated."}
     end
 
-    list = Ecto.Changeset.change(list, archived: Map.get(attrs, :title))
-    Repo.update(list)
+    %List{}
+    |> List.changeset(attrs)
+    |> Repo.update(list)
   end
 
   @doc """
   archives an existing list
   """
-  @spec archive_list(String.t()) :: %List{}
-  def archive_list(id) do
+  @spec update_list_status(String.t(), Boolean.t()) :: %List{}
+  def update_list_status(id, status) do
     list = get_list!(id)
-    list = Ecto.Changeset.change(list, archived: true)
+    list = Ecto.Changeset.change(list, archived: status)
     Repo.update(list)
   end
 
@@ -106,23 +108,24 @@ defmodule Keep.Todo do
     if list.archived do
       {:error, "item cannot be updated in archived list."}
     else
-      item = Ecto.Changeset.change(item, content: attrs.content)
-      Repo.update(item)
+      %Item{}
+      |> Item.changeset(attrs)
+      |> Repo.update(item)
     end
   end
 
   @doc """
-  marks list item as completed
+  marks list item as completed or not completed
   """
-  @spec mark_item_completed(String.t()) :: %Item{}
-  def mark_item_completed(id) do
+  @spec update_item_status(String.t(), Boolean.t()) :: %Item{}
+  def update_item_status(id, status) do
     item = get_item!(id)
     list = get_list!(item.list_id)
 
     if list.archived do
-      {:error, "item cannot be marked as completed in archived list."}
+      {:error, "item status cannot be updated in archived list."}
     else
-      item = Ecto.Changeset.change(item, completed: true)
+      item = Ecto.Changeset.change(item, completed: status)
       Repo.update(item)
     end
   end
@@ -135,9 +138,10 @@ defmodule Keep.Todo do
     Repo.transaction(fn ->
       with {:ok, list} <- create_list(list_attrs),
            {:ok, _} <- create_items(items, list) do
-        list |> Repo.preload(:items)
+        get_list!(list.id)
       else
-        _ -> Repo.rollback("Failed to create list")
+        _ ->
+          Repo.rollback("Failed to create list")
       end
     end)
   end
@@ -165,11 +169,12 @@ defmodule Keep.Todo do
   """
   def archive_lists do
     query =
-      from l in List,
+      from(l in List,
         where:
           l.archived == false and
             (l.inserted_at == l.updated_at or
                l.updated_at < datetime_add(^NaiveDateTime.utc_now(), -1, "hour"))
+      )
 
     Repo.update_all(query, set: [archived: true, updated_at: NaiveDateTime.utc_now()])
   end

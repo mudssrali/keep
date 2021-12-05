@@ -32,10 +32,10 @@ defmodule KeepWeb.Router do
 
     post("/list/create", TodoController, :create_list)
     post("/list/update", TodoController, :update_list)
-    post("/list/archive", TodoController, :archive_list)
+    post("/list/archived", TodoController, :update_list_status)
     post("/list/item/create", TodoController, :create_item)
     post("/list/item/update", TodoController, :update_item)
-    post("/list/item/completed", TodoController, :complete_item)
+    post("/list/item/completed", TodoController, :update_item_status)
     
     get("/lists", TodoController, :get_lists)
     get("/list", TodoController, :get_list)
