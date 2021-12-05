@@ -27,8 +27,14 @@ defmodule KeepWeb.API.TodoController do
   """
   def get_list(conn, params) do
     %{"id" => list_id} = params
-    list = Todo.get_list!(list_id)
-    render(conn, "list.json", list: list)
+    response = case Todo.get_list!(list_id) do
+      {:error, error} ->
+        failed(error)
+      list ->
+        succeed(list) 
+    end
+  
+    render(conn, "single_list.json", response: response)
   end
 
   @doc """
