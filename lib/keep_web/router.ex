@@ -17,7 +17,8 @@ defmodule KeepWeb.Router do
   scope "/", KeepWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    get "/", TodoController, :index
+    get "/todo/new", TodoController, :new
   end
 
   # Other scopes may use custom stacks.
