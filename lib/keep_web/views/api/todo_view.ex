@@ -36,6 +36,7 @@ defmodule KeepWeb.API.TodoView do
   def render("list.json", %{list: list}) do
     %{
       id: list.id,
+      title: list.title,
       archived: list.archived,
       inserted_at: list.inserted_at,
       updated_at: list.updated_at,

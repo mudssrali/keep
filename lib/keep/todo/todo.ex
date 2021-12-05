@@ -42,9 +42,17 @@ defmodule Keep.Todo do
   creates a new todo list
   """
   def create_list(attrs) do
-    %List{}
+   list = %List{}
     |> List.changeset(attrs)
     |> Repo.insert()
+
+  case list do
+    {:ok, list} ->
+      {:ok, Repo.preload(list, :items)}
+    {:error, error} ->
+      {:error, error}
+  end
+  
   end
 
   @doc """
