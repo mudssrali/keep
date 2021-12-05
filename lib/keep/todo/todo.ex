@@ -12,7 +12,9 @@ defmodule Keep.Todo do
   returns all todo lists with items
   """
   def all do
-    Repo.all(List)
+    query = from(l in List, order_by: [desc: :inserted_at], select: l)
+    
+    Repo.all(query)
     |> Repo.preload(:items)
   end
 
