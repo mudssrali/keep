@@ -1,4 +1,5 @@
 /* This file is for your main application CSS */
+@import "./water.css";
 @import "./phoenix.css";
 
 /* Alerts and form errors used by phx.new */
@@ -86,4 +87,13 @@
   color: black;
   text-decoration: none;
   cursor: pointer;
+}
+
+.text-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.text-left {
+  margin-left: auto;
 }
