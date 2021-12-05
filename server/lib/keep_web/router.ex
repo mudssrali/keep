@@ -10,7 +10,8 @@ defmodule KeepWeb.Router do
     plug :put_secure_browser_headers
   end
 
-  pipeline :api do
+  pipeline :api do 
+    plug CORSPlug, origin: ["*"]
     plug :accepts, ["json"]
   end
 
@@ -40,6 +41,15 @@ defmodule KeepWeb.Router do
     get("/lists", TodoController, :get_lists)
     get("/list", TodoController, :get_list)
   end
+
+
+  # Public Graphql API
+  scope "/api" do
+    pipe_through :api
+    forward "/graphiql", Absinthe.Plug.GraphiQL,
+            schema: KeepWeb.GraphQL.Schema
+  end
+
 
   # Enables LiveDashboard only for development
   #

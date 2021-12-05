@@ -68,9 +68,9 @@ defmodule Keep.Todo do
       {:error, "archived list cannot be updated."}
     end
 
-    %List{}
-    |> List.changeset(attrs)
-    |> Repo.update(list)
+    list = Ecto.Changeset.change(list, title: attrs.title)
+
+    Repo.update(list)
   end
 
   @doc """
@@ -108,9 +108,10 @@ defmodule Keep.Todo do
     if list.archived do
       {:error, "item cannot be updated in archived list."}
     else
-      %Item{}
-      |> Item.changeset(attrs)
-      |> Repo.update(item)
+      
+      item = Ecto.Changeset.change(item, content: attrs.content)
+
+      Repo.update(item)
     end
   end
 
