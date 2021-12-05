@@ -1,3 +1,13 @@
-<section class="row">
-    <h2>New Todo List</h2>
+<section class="column">
+    <h2>New Todo</h2>
+    <form class="column" onsubmit="return createTodo();">
+        <input id="todo" name="todo" placeholder="What's on your mind?" required />
+        <button type="submit" name="save">Save</button>
+    </form>
 </section>
+
+<script>
+    function createTodo(event) {
+        event.preventDefault();
+    }
+</script>

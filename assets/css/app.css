@@ -97,3 +97,57 @@
 .text-left {
   margin-left: auto;
 }
+
+.fieldset {
+  width: 100%;
+  position: relative;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.fieldset h1 {
+  position: absolute;
+  top: 0;
+  font-size: 18px;
+  line-height: 1;
+  margin: -9px 0 0; /* half of font-size */
+  background: #fff;
+  padding: 0 3px;
+  font-weight: bold;
+}
+.fieldset p {
+  margin: 0px;
+}
+
+.fieldset .item-row {
+  margin: 0px;
+  padding: 10px;
+  background: #dfdfdf;
+  width: 100%;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.list-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  margin: 0px;
+  margin-top: 10px;
+}
+
+.list-actions button {
+  margin: 2px;
+}
+
+.btn-list-archive {
+  border: none;
+  background-color: rgb(248, 71, 71)
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
