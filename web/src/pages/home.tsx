@@ -5,7 +5,9 @@ import React, { useEffect, useState } from 'react'
 import AppLayout from '../components/layout'
 
 type State = {
-	todos: Todos
+	todos: {
+		[id: string]: TodoList
+	}
 	loading: boolean
 	showArchived: boolean
 	error?: string
@@ -13,14 +15,15 @@ type State = {
 
 export function Home() {
 	const [state, setState] = useState<State>({
-		todos: [],
+		todos: {},
 		showArchived: false,
 		loading: false
 	})
 
 	useEffect(() => {
 		const reqOptions = {
-			method: 'GET'
+			method: 'GET',
+			mode: 'no-cors'
 		} as RequestInit
 
 		setState(prevState => ({ ...prevState, loading: true }))
@@ -30,7 +33,10 @@ export function Home() {
 			.then((res: ServerResponse) => {
 				console.log(res)
 				const todos = res.data as Todos
-				setState(prevState => ({ ...prevState, todos, loading: true }))
+
+				const mappedTodos = todos.reduce((agg, todo) => ({ ...agg, [todo.id]: todo }), {})
+
+				setState(prevState => ({ ...prevState, todos: mappedTodos, loading: true }))
 			})
 			.finally(() => {
 				setState(prevState => ({ ...prevState, loading: false }))
@@ -56,16 +62,25 @@ export function Home() {
 					<Spinner className="w-10 h-10" />
 					<p className="text-gray-500 animate-pulse">Loading Todos...</p>
 				</div>
-			) : state.todos.length === 0 ? (
+			) : Object.keys(state.todos).length === 0 ? (
 				<div className="text-center">
 					<p className="font-bold text-lg">No Todo Found</p>
 				</div>
 			) : (
 				<div className="w-full space-y-2 mb-10">
-					{(state.todos ?? [])
+							{Object.values(state.todos)
 						.filter(todo => state.showArchived === todo.archived)
 						.map(todo => (
-							<TodoListCard key={todo.id} todo={todo} />
+							<TodoListCard
+								key={todo.id}
+								todo={todo}
+								notifyListUpdate={todo =>
+									setState(prevState => ({
+										...prevState,
+										todos: { ...prevState.todos, [todo.id]: todo }
+									}))
+								}
+							/>
 						))}
 				</div>
 			)}
