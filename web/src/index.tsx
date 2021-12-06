@@ -1,8 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Routes from './routing'
-
-import './styles/main.css'
-import './styles/water.css'
+import './styles/app.css'
+import './styles/helper.css'
 
 ReactDOM.render(<Routes />, document.getElementById('keep'))
