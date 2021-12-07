@@ -44,7 +44,7 @@ export const TodoListCard = ({ todo, notifyListUpdate }: TodoListCardProps) => {
 		fetch('/api/list/archived', requestOptions)
 			.then(res => res.json())
 			.then((res: ServerResponse) => {
-				console.log(res.error)
+				console.log(res)
 
 				if (res.code === 200) {
 					toast.dismiss(toastId)

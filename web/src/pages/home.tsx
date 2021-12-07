@@ -1,7 +1,11 @@
 import { SwitchButton } from 'components/button/switch'
+import { Modal } from 'components/modal'
 import { Spinner } from 'components/spinner'
+import { TodoCreateForm } from 'components/todo/create-form'
 import { TodoListCard } from 'components/todo/list-card'
+import { useComponentVisible } from 'hooks/useComponentVisible'
 import React, { useEffect, useState } from 'react'
+import { compareDate } from 'utils'
 import AppLayout from '../components/layout'
 
 type State = {
@@ -19,6 +23,12 @@ export function Home() {
 		showArchived: false,
 		loading: false
 	})
+
+	const {
+		ref: modalRef,
+		isComponentVisible: modalIsVisible,
+		setIsComponentVisible: setModalIsVisble
+	} = useComponentVisible(true)
 
 	useEffect(() => {
 		const reqOptions = {
@@ -53,7 +63,9 @@ export function Home() {
 						setState(prevState => ({ ...prevState, showArchived: !state.showArchived }))
 					}
 				/>
-				<button className="bg-green-400 focus-within:outline-none hover:bg-green-500 px-4 py-2 rounded-md text-white">
+				<button
+					onClick={() => setModalIsVisble(!modalIsVisible)}
+					className="bg-blue-400 focus-within:outline-none hover:bg-blue-500 px-4 py-2 rounded-md text-white">
 					Add New
 				</button>
 			</div>
@@ -70,6 +82,7 @@ export function Home() {
 				<div className="w-full space-y-2 mb-10">
 							{Object.values(state.todos)
 						.filter(todo => state.showArchived === todo.archived)
+								.sort((a, b) => compareDate(a.inserted_at, b.inserted_at, 'asc'))
 						.map(todo => (
 							<TodoListCard
 								key={todo.id}
@@ -83,6 +96,23 @@ export function Home() {
 							/>
 						))}
 				</div>
+			)}
+
+			{modalIsVisible && (
+				<Modal>
+					<div className="w-full border-gray-400 rounded-md bg-white" ref={modalRef}>
+						<TodoCreateForm
+							type={'LIST'}
+							notifyCreate={todo => {
+								setModalIsVisble(!modalIsVisible)
+								setState(prevState => ({
+									...prevState,
+									todos: { ...prevState.todos, [todo.id]: todo as TodoList }
+								}))
+							}}
+						/>
+					</div>
+				</Modal>
 			)}
 		</AppLayout>
 	)
