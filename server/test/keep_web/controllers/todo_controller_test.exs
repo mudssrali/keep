@@ -118,7 +118,7 @@ defmodule KeepWeb.TodoControllerTest do
 
       assert json_response(conn, 200)
       item = Map.get(json_response(conn, 200), "data")
-      assert item["content"] == new_item["content"]
+      assert item["content"] == new_item.content
     end
 
     test "POST /api/list/item/update" do
@@ -142,7 +142,7 @@ defmodule KeepWeb.TodoControllerTest do
 
       conn = post(conn, Routes.todo_path(conn, :update_item, update_item))
       updated_item = Map.get(json_response(conn, 200), "data")
-      refute item["content"] == updated_item["content"]
+      assert updated_item["content"] == update_item.content
     end
   end
 end
