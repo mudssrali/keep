@@ -22,10 +22,10 @@ defmodule KeepWeb.TodoControllerTest do
 
       # checking serialization
       assert json_response(conn, 200) == %{
-        "data" => [],
-        "status" => "success",
-        "code" => 200
-      }
+               "data" => [],
+               "status" => "success",
+               "code" => 200
+             }
     end
 
     test "get_list renders a single todo list" do
@@ -55,17 +55,76 @@ defmodule KeepWeb.TodoControllerTest do
   end
 
   describe "todo-create-update-archive" do
-    test  "create list" do
+    test "create todo list" do
       conn = build_conn()
       conn = post(conn, Routes.todo_path(conn, :create_list, %{"title" => "Web3"}))
-      
       assert json_response(conn, 200)
-
       json_response = json_response(conn, 200)
-      list =  Map.get(json_response, "data")
-      
+      list = Map.get(json_response, "data")
       assert list["title"] == "Web3"
     end
-  end
 
+    test "update recently created todo list" do
+      conn = build_conn()
+      conn = post(conn, Routes.todo_path(conn, :create_list, %{"title" => "Web3"}))
+
+      assert json_response(conn, 200)
+      list = Map.get(json_response(conn, 200), "data")
+
+      conn =
+        post(
+          conn,
+          Routes.todo_path(conn, :update_list, %{
+            "title" => "Web2.0 Still works",
+            "list_id" => list["id"]
+          })
+        )
+
+      assert json_response(conn, 200)
+      updated_list = Map.get(json_response(conn, 200), "data")
+      assert list["title"] != updated_list["title"]
+    end
+
+    test "create an item for a todo list" do
+      conn = build_conn()
+      conn = post(conn, Routes.todo_path(conn, :create_list, %{"title" => "Web3"}))
+
+      list = Map.get(json_response(conn, 200), "data")
+
+      new_item = %{
+        "list_id" => list["id"],
+        "content" => "Decentralization"
+      }
+
+      conn = post(conn, Routes.todo_path(conn, :create_item, new_item))
+      assert json_response(conn, 200)
+      item = Map.get(json_response(conn, 200), "data")
+      assert item["content"] == new_item["content"]
+    end
+
+    test "update an item" do
+      conn = build_conn()
+      conn = post(conn, Routes.todo_path(conn, :create_list, %{"title" => "Web3"}))
+
+      list = Map.get(json_response(conn, 200), "data")
+
+      new_item = %{
+        "list_id" => list["id"],
+        "content" => "Decentralization"
+      }
+
+      conn = post(conn, Routes.todo_path(conn, :create_item, new_item))
+      item = Map.get(json_response(conn, 200), "data")
+
+      update_item = %{
+        "item_id" => item["id"],
+        "content" => "Decentralization - Expensive"
+      }
+
+      conn = post(conn, Routes.todo_path(conn, :update_item, update_item))
+
+      updated_item = Map.get(json_response(conn, 200), "data")
+      assert item["content"] != updated_item["content"]
+    end
+  end
 end
