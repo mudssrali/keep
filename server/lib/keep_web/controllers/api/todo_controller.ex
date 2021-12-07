@@ -85,6 +85,9 @@ defmodule KeepWeb.API.TodoController do
   def update_list_status(conn, params) do
     id = Map.get(params, "list_id")
     status = Map.get(params, "archived")
+
+    status = if is_boolean(status), do: status, else: String.to_existing_atom(status)
+
     response =
       case Todo.update_list_status(id, status) do
         {:ok, list} ->
@@ -146,6 +149,9 @@ defmodule KeepWeb.API.TodoController do
   def update_item_status(conn, params) do
     id = Map.get(params, "item_id")
     status = Map.get(params, "completed")
+
+    status = if is_boolean(status), do: status, else: String.to_existing_atom(status)
+
     response =
       case Todo.update_item_status(id, status) do
         {:ok, item} ->
