@@ -8,6 +8,7 @@ defmodule Keep.Todo.Cleanup do
   alias Keep.Todo
 
   def start_link(_opts) do
+    # Storing counter in the gen-server state to keep track of no. of executaion
     GenServer.start_link(__MODULE__, %{counter: 0})
   end
 
@@ -18,10 +19,10 @@ defmodule Keep.Todo.Cleanup do
   end
 
   def handle_info(:work, state) do
-    # Exec clean-up logic
+    # Execute todo lists clean-up logic
     {updated_count, nil} = Todo.archive_lists()
+    
     IO.puts("Cleanup Server: #{state.counter}")
-
     IO.puts("Archived #{updated_count} lists that have not been archived in last 24 hours")
 
     # Reschedule clean-up process once more
@@ -29,7 +30,9 @@ defmodule Keep.Todo.Cleanup do
     {:noreply, %{counter: state.counter + 1}}
   end
 
+  @doc false
   defp schedule_work() do
+    # Send new work request after 5 mins
     Process.send_after(self(), :work, 5 * 60 * 1000)
   end
 end
