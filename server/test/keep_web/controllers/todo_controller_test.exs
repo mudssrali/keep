@@ -102,7 +102,7 @@ defmodule KeepWeb.TodoControllerTest do
       assert item["content"] == new_item["content"]
     end
 
-        test "update an item" do
+    test "update an item" do
       conn = build_conn()
       conn = post(conn, Routes.todo_path(conn, :create_list, %{"title" => "Web3"}))
 
@@ -126,7 +126,5 @@ defmodule KeepWeb.TodoControllerTest do
       updated_item = Map.get(json_response(conn, 200), "data")
       assert item["content"] != updated_item["content"]
     end
-    
-
   end
 end
