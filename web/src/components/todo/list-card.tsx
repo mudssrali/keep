@@ -55,24 +55,30 @@ export const TodoListCard = ({ todo, notifyListUpdate }: TodoListCardProps) => {
 			body: JSON.stringify(payload)
 		} as RequestInit
 
-		const toastId = toast.loading('archiving list...')
+		const toastId = toast.loading(
+			`Marking list ${payload.archived ? 'archived' : 'unarchive'}...`
+		)
 
 		fetch('/api/list/archived', requestOptions)
 			.then(res => res.json())
-			.then((res: ServerResponse) => {
-				console.log(res)
+			.then(
+				(res: ServerResponse) => {
+					console.log(res)
 
-				if (res.code === 200) {
+					if (res.code === 200) {
+						toast.dismiss(toastId)
+						notifyListUpdate(res.data as TodoList)
+					} else {
+						toast.dismiss(toastId)
+						toast.error(res.error)
+					}
+				},
+				error => {
+					console.log(error)
+					toast.error('Something went wrong.')
 					toast.dismiss(toastId)
-					notifyListUpdate(res.data as TodoList)
-				} else {
-					toast.dismiss(toastId)
-					toast.error('Something went wrong!')
 				}
-			})
-			.finally(() => {
-				toast.dismiss(toastId)
-			})
+			)
 	}
 
 	return (
@@ -100,7 +106,7 @@ export const TodoListCard = ({ todo, notifyListUpdate }: TodoListCardProps) => {
 				{(state.list.items ?? [])
 					.sort((a, b) => compareDate(a.inserted_at, b.inserted_at, 'asc'))
 					.map(item => (
-						<TodoItemCard key={item.id} item={item} />
+						<TodoItemCard key={item.id} item={item} editable={!state.list.archived} />
 					))}
 			</div>
 			<div className="mt-2">
