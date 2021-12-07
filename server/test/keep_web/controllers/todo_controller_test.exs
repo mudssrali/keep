@@ -4,6 +4,18 @@ defmodule KeepWeb.TodoControllerTest do
   alias Keep.Repo
   alias Keep.Todo
 
+   describe "Public view pages" do
+    test "GET /", %{conn: conn} do
+      conn = get(conn, "/")
+      assert html_response(conn, 200) =~ "Keep  - Simple Notes"
+    end
+
+    test "GET /todo/new", %{conn: conn} do
+      conn = get(conn, "/todo/new")
+      assert html_response(conn, 200) =~ "New Todo"
+    end
+  end
+
   describe "Public API - GET" do
     @valid_attrs %{title: "Coding Styles"}
 
