@@ -22,5 +22,5 @@ interface ServerResponse {
 	status: 'success' | 'failed'
 	code: number
 	data: unknown
-	error: unknown
+	error: string
 }

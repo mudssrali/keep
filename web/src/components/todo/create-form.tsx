@@ -5,7 +5,7 @@ import toast from 'react-hot-toast'
 
 interface TodoCreateFormProps {
 	type: 'LIST' | 'ITEM'
-	todoId?: string
+	list?: TodoList
 	notifyCreate: (todo: TodoList | TodoItem) => void
 }
 
@@ -14,7 +14,7 @@ type State = {
 	todo: string
 }
 
-export const TodoCreateForm = ({ type, notifyCreate, todoId }: TodoCreateFormProps) => {
+export const TodoCreateForm = ({ type, notifyCreate, list }: TodoCreateFormProps) => {
 	const [state, setState] = useState<State>({
 		submitted: false,
 		todo: ''
@@ -23,14 +23,14 @@ export const TodoCreateForm = ({ type, notifyCreate, todoId }: TodoCreateFormPro
 	const handleFormSubmission = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 
-		const createUrl = type === 'LIST' ? '/api/list/create' : '/api/list/create/item'
+		const createUrl = type === 'LIST' ? '/api/list/create' : '/api/list/item/create'
 		const payload =
 			type === 'LIST'
 				? {
 					title: state.todo
 				}
 				: {
-					list_id: todoId,
+					list_id: list.id,
 					content: state.todo
 				}
 
@@ -53,18 +53,22 @@ export const TodoCreateForm = ({ type, notifyCreate, todoId }: TodoCreateFormPro
 						notifyCreate(res.data as TodoList | TodoItem)
 					} else {
 						setState(prevState => ({ ...prevState, submitted: false }))
-						toast.error('Something went wrong!')
+						toast.error(res.error)
 					}
 				},
 				error => {
 					console.log(error)
+					setState(prevState => ({ ...prevState, submitted: false }))
+					toast.error('Something went wrong!')
 				}
 			)
 	}
 
 	return (
 		<form className="p-4 flex flex-col space-y-4" onSubmit={handleFormSubmission}>
-			<p className="font-semibold">What&apos;s on your mind?</p>
+			<p className="font-semibold">
+				{`New ${type === 'LIST' ? 'List' : 'Item'}`}: What&apos;s on your mind?
+			</p>
 			<textarea
 				className={clsx('border border-gray-200 focus-within:outline-none p-2 rounded-md', {
 					'pointer-events-none': state.submitted

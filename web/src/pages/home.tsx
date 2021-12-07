@@ -28,7 +28,7 @@ export function Home() {
 		ref: modalRef,
 		isComponentVisible: modalIsVisible,
 		setIsComponentVisible: setModalIsVisble
-	} = useComponentVisible(true)
+	} = useComponentVisible(false)
 
 	useEffect(() => {
 		const reqOptions = {
