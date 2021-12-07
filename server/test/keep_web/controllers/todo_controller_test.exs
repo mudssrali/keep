@@ -4,7 +4,7 @@ defmodule KeepWeb.TodoControllerTest do
   alias Keep.Repo
   alias Keep.Todo
 
-   describe "Public view pages" do
+  describe "Public view pages" do
     test "GET /", %{conn: conn} do
       conn = get(conn, "/")
       assert html_response(conn, 200) =~ "Keep  - Simple Notes"
@@ -155,6 +155,86 @@ defmodule KeepWeb.TodoControllerTest do
       conn = post(conn, Routes.todo_path(conn, :update_item, update_item))
       updated_item = Map.get(json_response(conn, 200), "data")
       assert updated_item["content"] == update_item.content
+    end
+
+    test "POST /api/list/item/completed when completed true" do
+      conn = build_conn()
+      conn = post(conn, Routes.todo_path(conn, :create_list, %{title: "Web3"}))
+
+      list = Map.get(json_response(conn, 200), "data")
+
+      new_item = %{
+        list_id: list["id"],
+        content: "Decentralization"
+      }
+
+      conn = post(conn, Routes.todo_path(conn, :create_item, new_item))
+      item = Map.get(json_response(conn, 200), "data")
+
+      conn =
+        post(
+          conn,
+          Routes.todo_path(conn, :update_item_status, %{item_id: item["id"], completed: true})
+        )
+
+      updated_item = Map.get(json_response(conn, 200), "data")
+
+      assert updated_item["completed"]
+    end
+
+    test "POST /api/list/item/completed when completed false" do
+      conn = build_conn()
+      conn = post(conn, Routes.todo_path(conn, :create_list, %{title: "Web3"}))
+
+      list = Map.get(json_response(conn, 200), "data")
+
+      new_item = %{
+        list_id: list["id"],
+        content: "Decentralization"
+      }
+
+      conn = post(conn, Routes.todo_path(conn, :create_item, new_item))
+      item = Map.get(json_response(conn, 200), "data")
+
+      conn =
+        post(
+          conn,
+          Routes.todo_path(conn, :update_item_status, %{item_id: item["id"], completed: false})
+        )
+
+      updated_item = Map.get(json_response(conn, 200), "data")
+
+      refute updated_item["completed"]
+    end
+
+    test "POST /api/list/item/create when list is archived" do
+      conn = build_conn()
+      conn = post(conn, Routes.todo_path(conn, :create_list, %{title: "Web3"}))
+
+      list = Map.get(json_response(conn, 200), "data")
+
+      conn =
+        post(
+          conn,
+          Routes.todo_path(conn, :update_list_status, %{
+            list_id: list["id"],
+            archived: true
+          })
+        )
+
+      assert json_response(conn, 200)
+      updated_list = Map.get(json_response(conn, 200), "data")
+      assert updated_list["archived"]
+
+      new_item = %{
+        list_id: list["id"],
+        content: "Decentralization"
+      }
+
+      conn = post(conn, Routes.todo_path(conn, :create_item, new_item))
+      status = Map.get(json_response(conn, 200), "status")
+
+      refute status == "success"
     end
   end
 end
