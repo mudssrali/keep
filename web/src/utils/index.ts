@@ -1,4 +1,6 @@
 import axios, { CancelTokenSource } from 'axios'
+import { DateTime } from 'luxon'
+
 
 const makeRequestCreator = () => {
 	let cancelTokenSource: CancelTokenSource
@@ -24,3 +26,9 @@ const makeRequestCreator = () => {
 }
 
 export const liveSearch = makeRequestCreator()
+
+export const compareDate = (d1: string, d2: string, order?: 'asc' | 'desc') => {
+	if (order === 'asc') return DateTime.fromISO(d1) < DateTime.fromISO(d2) ? 0 : -1
+
+	return DateTime.fromISO(d2) < DateTime.fromISO(d1) ? 0 : -1
+}
