@@ -66,17 +66,16 @@ defmodule Keep.Todo do
 
     if list.archived do
       {:error, "archived list cannot be updated."}
+    else
+      list = Ecto.Changeset.change(list, title: attrs.title)
+      Repo.update(list)
     end
-
-    list = Ecto.Changeset.change(list, title: attrs.title)
-
-    Repo.update(list)
   end
 
   @doc """
   archives an existing list
   """
-  @spec update_list_status(String.t(), Boolean.t()) :: %List{}
+  @spec update_list_status(String.t(), Boolean.t()) :: {:ok, %List{}}
   def update_list_status(id, status) do
     list = get_list!(id)
     list = Ecto.Changeset.change(list, archived: status)
@@ -118,7 +117,7 @@ defmodule Keep.Todo do
   @doc """
   marks list item as completed or not completed
   """
-  @spec update_item_status(String.t(), Boolean.t()) :: %Item{}
+  @spec update_item_status(String.t(), Boolean.t()) :: %Item{} | {:error, String.t()}
   def update_item_status(id, status) do
     item = get_item!(id)
     list = get_list!(item.list_id)
@@ -134,7 +133,7 @@ defmodule Keep.Todo do
   @doc """
   creates a todo list with items
   """
-  @spec create_list_with_items(%{}, [String.t()]) :: %List{}
+  @spec create_list_with_items(%{}, [String.t()]) :: %List{} | {:error, any}
   def create_list_with_items(list_attrs, items) do
     Repo.transaction(fn ->
       with {:ok, list} <- create_list(list_attrs),
@@ -150,7 +149,7 @@ defmodule Keep.Todo do
   @doc """
   creates items for a todo list
   """
-  @spec create_items([String.t()], %List{}) :: {}
+  @spec create_items([String.t()], %List{}) :: {:ok, any} | {:error, any}
   def create_items(items, list) do
     results =
       items
